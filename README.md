@@ -1,1 +1,3 @@
-# ollama-container
+# container for ollama container developement
+/bin/ollama
+....

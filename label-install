@@ -1,0 +1,36 @@
+#!/bin/sh
+create_command_bin() {
+SCRIPT=$1
+if [ ! -e ${TARGET}/${SCRIPT} ]; then
+        cd ${TARGET}; ln -s dev-ollama-wrapper.sh ${SCRIPT}
+else
+        echo "${TARGET}/${SCRIPT} already exist, will not update it"
+fi
+}
+
+if [ ! -e ${TARGET}/${SCRIPT} ]; then
+        echo "Failed to create ${TARGET}/${SCRIPT}"
+        exit 1
+fi
+
+# Commands to create
+COMMANDS=" \
+dev-ollama \
+"
+
+# determime target directory
+# either /usrlocalbin or current user bin
+if [ -d /host/usr/local/bin ]; then
+        TARGET=/host/usr/local/bin
+elif [ -d /host/bin ] ; then
+        TARGET=/host/bin
+else
+        echo "could not determine copy target"
+        exit 1
+fi
+
+cp /container/dev-ollama-wrapper.sh ${TARGET}/dev-ollama-wrapper.sh
+
+for COMMAND in ${COMMANDS}; do
+    create_command_bin ${COMMAND}
+done
