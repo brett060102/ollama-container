@@ -5,7 +5,7 @@
 #!BuildTag: suse/alp/workloads/dev-ollama:%PKG_VERSION%.%TAG_OFFSET%.%RELEASE%
 
 
-FROM registry.suse.com/bci/bci-base
+FROM opensuse/tumbleweed
 # Mandatory labels for the build service:
 #   https://en.opensuse.org/Building_derived_containers
 # Define labels according to https://en.opensuse.org/Building_derived_containers
@@ -24,22 +24,13 @@ LABEL com.suse.release-stage="alpha"
 
 # openssh-clients : for ansble ssh
 
+RUN zypper --non-interactive --gpg-auto-import-keys addrepo 'https://download.opensuse.org/repositories/openSUSE:Tools/openSUSE_Tumbleweed/openSUSE:Tools.repo'
+RUN zypper --non-interactive --no-gpg-checks --gpg-auto-import-keys addrepo http://download.opensuse.org/tumbleweed/repo/oss oss
+RUN zypper -v -n --no-gpg-checks in ollama
+RUN zypper clean --all
+
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
-
-RUN mkdir /container
-COPY entrypoint.sh /container/entrypoint.sh
-RUN chmod +x /container/entrypoint.sh
-COPY dev-ollama-wrapper.sh /container/dev-ollama-wrapper.sh
-RUN chmod +x /container/dev-ollama-wrapper.sh
-COPY label-install /container
-COPY label-uninstall /container
-
-
-WORKDIR /work
-
-LABEL INSTALL="/usr/bin/podman run --env IMAGE=IMAGE --rm --security-opt label=disable -v \${PWD}/:/host IMAGE /bin/bash /container/label-install"
-LABEL UNINSTALL="/usr/bin/podman run --rm --security-opt label=disable -v \${PWD}/:/host IMAGE /bin/bash /container/label-uninstall"
 
 EXPOSE 11434
 ENV OLLAMA_HOST 0.0.0.0
@@ -48,7 +39,3 @@ ENTRYPOINT ["/usr/bin/ollama"]
 CMD ["serve"]
 
 
-RUN zypper --non-interactive --gpg-auto-import-keys addrepo 'https://download.opensuse.org/repositories/openSUSE:Tools/openSUSE_Tumbleweed/openSUSE:Tools.repo'
-RUN zypper --non-interactive --no-gpg-checks --gpg-auto-import-keys addrepo http://download.opensuse.org/tumbleweed/repo/oss oss
-RUN zypper -v -n --no-gpg-checks in ollama
-RUN zypper clean --all
